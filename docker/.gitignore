@@ -1,0 +1,4 @@
+/data/mssql/*
+!/data/mssql/.gitkeep
+/deploy/platform/*
+!/deploy/platform/.gitkeep

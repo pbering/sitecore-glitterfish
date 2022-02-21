@@ -1,0 +1,13 @@
+{
+    "namespace": "Default",
+    "references": [],
+    "items": {
+        "includes": [
+            {
+                "name": "content",
+                "path": "/sitecore/content/Home",
+                "scope": "SingleItem"
+            }
+        ]
+    }
+}
