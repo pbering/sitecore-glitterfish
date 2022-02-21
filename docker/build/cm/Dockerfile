@@ -14,39 +14,45 @@ FROM ${PARENT_IMAGE}
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-####
+###
 
-## TODO: add to new stage for downloads
+## TODO: add to new stage for downloads?
 RUN New-Item -Path 'C:\\downloads' -ItemType 'Directory' -Force | Out-Null; `
     & curl.exe -sS -L -o 'C:\\downloads\\SQL2019-SSEI-Expr.exe' https://go.microsoft.com/fwlink/?LinkID=866658; `
-    # & curl.exe -sS -L -o 'C:\\downloads\\SqlLocalDB.msi' https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi; `
-    & curl.exe -sS -L -o 'C:\\downloads\\VC_redist.x64.exe' https://aka.ms/vs/15/release/VC_redist.x64.exe; `
+    & curl.exe -sS -L -o 'C:\\downloads\\VC_redist.x64.exe' https://aka.ms/vs/17/release/vc_redist.x64.exe; `
     & curl.exe -sS -L -o 'C:\\downloads\\msodbcsql.msi' https://download.microsoft.com/download/E/6/B/E6BFDC7A-5BCD-4C51-9912-635646DA801E/en-US/17.5.2.1/x64/msodbcsql.msi; `
     & curl.exe -sS -L -o 'C:\\downloads\\MsSqlCmdLnUtils.msi' https://go.microsoft.com/fwlink/?linkid=2142258; `
-    & curl.exe -sS -L -o 'C:\\downloads\\SQLServer2019-KB5008996-x64.exe' https://download.microsoft.com/download/6/e/7/6e72dddf-dfa4-4889-bc3d-e5d3a0fd11ce/SQLServer2019-KB5008996-x64.exe
+    & curl.exe -sS -L -o 'C:\\downloads\\SQLServer2019-CU-x64.exe' https://download.microsoft.com/download/6/e/7/6e72dddf-dfa4-4889-bc3d-e5d3a0fd11ce/SQLServer2019-KB5008996-x64.exe; `
+    & curl.exe -sS -L -o 'C:\\downloads\\DacFramework.msi' https://go.microsoft.com/fwlink/?linkid=2185764
 
+# install LocalDB
 RUN Start-Process 'C:\\downloads\\SQL2019-SSEI-Expr.exe' -ArgumentList '/Action=Download', '/MediaType=LocalDB', '/Quiet' -NoNewWindow -Wait;
 RUN Start-Process 'C:\\downloads\\VC_redist.x64.exe' -ArgumentList '/install', '/passive', '/norestart' -NoNewWindow -Wait;
 RUN Start-Process msiexec.exe -ArgumentList '/i',  (Join-Path $env:USERPROFILE '\Downloads\en-US\\SqlLocalDB.msi'), '/quiet', '/norestart', 'IACCEPTSQLLOCALDBLICENSETERMS=YES', '/L C:\localdb-install-log.txt' -NoNewWindow -Wait;
+
+# install sqlcmd.exe
 RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\msodbcsql.msi', '/quiet', '/norestart', 'IACCEPTMSODBCSQLLICENSETERMS=YES', '/L C:\msodbcsql-install-log.txt' -NoNewWindow -Wait;
 RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\MsSqlCmdLnUtils.msi', '/quiet', '/norestart', 'IACCEPTMSSQLCMDLNUTILSLICENSETERMS=YES', '/L C:\sqlcmd-install-log.txt' -NoNewWindow -Wait;
-RUN C:\\downloads\\SQLServer2019-KB5008996-x64.exe /X:C:/downloads/KB5008996
-RUN C:\\downloads\\KB5008996\\SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTerms
+
+# install sqlpackage.exe
+RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\DacFramework.msi', '/quiet', '/norestart', '/L C:\dac-install-log.txt' -NoNewWindow -Wait;
+
+# install latest CU
+RUN C:\\downloads\\SQLServer2019-CU-x64.exe /X:C:/downloads/CU
+RUN C:\\downloads\\CU\\SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTerms
+
+# cleanup
+RUN Remove-Item -Path 'C:\\downloads' -Force -Recurse
+
+# create LocalDB instance and share
 RUN SqlLocalDB.exe create 'Sitecore'; `
     SqlLocalDB.exe share 'Sitecore' 'SC_DB';
-        # RUN sqllocaldb.exe share 'MSSQLLocalDB' 'SC_DB'; `
-#     sqllocaldb.exe info '.\SC_DB';
-# TODO: cannot start, use: https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/sqlclient-support-for-localdb
 
-####
+# TODO: cannot start, try use: https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/sqlclient-support-for-localdb
 
 COPY . C:/inetpub/wwwroot/App_Data/databases/
 RUN icacls 'C:\inetpub\wwwroot\App_Data\databases\*' /grant 'Everyone:M'
-####
-
-
 ###
-
 
 ARG BUILD_CONFIGURATION='Release'
 
@@ -56,16 +62,6 @@ ENV SITECORE_LICENSE_LOCATION='C:\license\license.xml' `
     Sitecore_ConnectionStrings_Master='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.Master;' `
     Sitecore_ConnectionStrings_Web='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.Web;' `
     Sitecore_ConnectionStrings_ExperienceForms='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.ExperienceForms;' `
-    # Sitecore_ConnectionStrings_Core='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFileName=|DataDirectory|\databases\Sitecore.Core_Primary.mdf' `
-    # Sitecore_ConnectionStrings_Security='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFileName=|DataDirectory|\Sitecore.Core_Primary.mdf' `
-    # Sitecore_ConnectionStrings_Master='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFileName=|DataDirectory|\Sitecore.Master_Primary.mdf' `
-    # Sitecore_ConnectionStrings_Web='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFileName=|DataDirectory|\Sitecore.Web_Primary.mdf' `
-    # Sitecore_ConnectionStrings_ExperienceForms='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFileName=|DataDirectory|\Sitecore.Experienceforms_Primary.mdf' `
-    # Sitecore_ConnectionStrings_Core='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFilename=C:\inetpub\wwwroot\App_Data\databases\Sitecore.Core_Primary.mdf' `
-    # Sitecore_ConnectionStrings_Security='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFilename=C:\inetpub\wwwroot\App_Data\databases\Sitecore.Core_Primary.mdf' `
-    # Sitecore_ConnectionStrings_Master='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFilename=C:\inetpub\wwwroot\App_Data\databases\Sitecore.Master_Primary.mdf' `
-    # Sitecore_ConnectionStrings_Web='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFilename=C:\inetpub\wwwroot\App_Data\databases\Sitecore.Web_Primary.mdf' `
-    # Sitecore_ConnectionStrings_ExperienceForms='Server=(LocalDB)\.\SC_DB;Integrated Security=true;AttachDbFilename=C:\inetpub\wwwroot\App_Data\databases\Sitecore.Experienceforms_Primary.mdf' `
     MEDIA_REQUEST_PROTECTION_SHARED_SECRET='4IDZxWd41uFe4_7drK_pnO9lzDLTgtK-L-gEx3KNLMzuwzEPEJpHX9G4HZtK' `
     Sitecore_AppSettings_Telerik.AsyncUpload.ConfigurationEncryptionKey='QCkAzV6c7q1bXGcdy8uFkJ9JC7Ns0nL00vlAo0eKZ9Mcn-zvbX-LmgdpnCJf' `
     Sitecore_AppSettings_Telerik.Upload.ConfigurationHashKey='gs4gZxwuW1POyjbHrYiL7SlZlM5kDtuNWGo2-XuGWU--cCPyD53keInlnTgarNTVXRwbh4anM5z0bNB6q8dBZBTKvK15yuLKpyjh' `

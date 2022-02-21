@@ -17,6 +17,11 @@ services:
       - .\docker\deploy\platform:C:\deploy:rw
       - ${HOST_LICENSE_FOLDER}:C:\license:ro
     entrypoint: powershell.exe -Command "& C:\tools\entrypoints\iis\Development.ps1"
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+          memory: 3GB
     depends_on:
       solution:
         condition: service_started
