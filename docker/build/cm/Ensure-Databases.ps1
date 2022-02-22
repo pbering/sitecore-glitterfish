@@ -19,7 +19,7 @@ if ($null -ne $localDbState -and $localDbState -like "*stopped")
 
 Write-Host "### LocalDB ready."
 
-# deploy or attach databases
+# ensure databases ready
 $existingDatabases = (sqlcmd.exe -S $sqlServer -Q "SET NOCOUNT ON; SELECT name FROM sys.databases" -h -1 -W)
 $expectedDatabases = Get-ChildItem -Path "C:\mssql-init\resources" -Filter "*.dacpac"
 $missingDatabases = $expectedDatabases | Where-Object { !$existingDatabases.Contains($_.BaseName) }
@@ -52,7 +52,7 @@ if ($missingDatabases.Count -gt 0)
 
 Write-Host "### Sitecore databases ready."
 
-# deploy any missing SQL logins
+# ensure SQL credentials ready
 $deploySqlLogin = (sqlcmd.exe -S $sqlServer -Q "SELECT COUNT(*) FROM sys.server_principals WHERE name = '$sqlLogin';" -h -1 -W | Select-Object -First 1) -eq "0"
 
 if ($deploySqlLogin)
