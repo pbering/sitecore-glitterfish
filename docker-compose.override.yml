@@ -3,6 +3,7 @@ services:
     ports:
       - "44090:80"
     environment:
+      SITECORE_ADMIN_PASSWORD: ${SITECORE_ADMIN_PASSWORD}
       SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
     volumes:
       - ${HOST_LICENSE_FOLDER}:C:\license:ro

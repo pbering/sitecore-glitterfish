@@ -3,6 +3,7 @@ $sqlShareName = "SC"
 $sqlServer = "(LocalDB)\.\$sqlShareName"
 $sqlLogin = "IIS APPPOOL\DefaultAppPool"
 $sqlDataRoot = "$env:USERPROFILE\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances\$sqlInstanceName"
+$resourcesPath = "C:\mssql-init\resources"
 
 # ensure localdb is ready
 $localDbState = (sqllocaldb.exe info $sqlInstanceName | Select-String "State:")
@@ -21,7 +22,7 @@ Write-Host "### LocalDB ready."
 
 # ensure databases ready
 $existingDatabases = (sqlcmd.exe -S $sqlServer -Q "SET NOCOUNT ON; SELECT name FROM sys.databases" -h -1 -W)
-$expectedDatabases = Get-ChildItem -Path "C:\mssql-init\resources" -Filter "*.dacpac"
+$expectedDatabases = Get-ChildItem -Path $resourcesPath -Filter "*.dacpac"
 $missingDatabases = $expectedDatabases | Where-Object { !$existingDatabases.Contains($_.BaseName) }
 
 if ($missingDatabases.Count -gt 0)
@@ -61,3 +62,8 @@ if ($deploySqlLogin)
 }
 
 Write-Host "### SQL credentials ready."
+
+# ensure Sitecore admin password
+. C:\mssql-init\SetSitecoreAdminPassword.ps1 -ResourcesDirectory $resourcesPath -SitecoreAdminPassword $env:SITECORE_ADMIN_PASSWORD -SqlServer $sqlServer
+
+Write-Host "### Sitecore admin credentials ready."

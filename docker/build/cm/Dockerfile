@@ -42,8 +42,9 @@ RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\DacFramework.m
 RUN C:\\downloads\\SQLServer2019-CU-x64.exe /X:C:/downloads/CU;
 RUN C:\\downloads\\CU\\SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTerms
 
-# install Sitecore stock dacpac's
+# install assets from stock mssql-init image
 COPY --from=mssql_init C:\resources C:\mssql-init\resources\
+COPY --from=mssql_init C:\SetSitecoreAdminPassword.ps1 C:\mssql-init\
 
 # install scripts
 COPY *.ps1 C:/tools/entrypoints/iis/
