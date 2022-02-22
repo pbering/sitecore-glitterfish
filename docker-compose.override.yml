@@ -14,8 +14,9 @@ services:
     environment:
       SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
     volumes:
-      - .\docker\deploy\platform:C:\deploy:rw
       - ${HOST_LICENSE_FOLDER}:C:\license:ro
+      - .\docker\deploy\platform:C:\deploy:rw
+      - .\docker\data\mssql:C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances:rw
     entrypoint: powershell.exe -Command "& C:\tools\entrypoints\iis\Development.ps1"
     deploy:
       resources:

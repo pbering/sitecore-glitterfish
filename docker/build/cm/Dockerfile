@@ -26,32 +26,28 @@ RUN New-Item -Path 'C:\\downloads' -ItemType 'Directory' -Force | Out-Null; `
     & curl.exe -sS -L -o 'C:\\downloads\\DacFramework.msi' https://go.microsoft.com/fwlink/?linkid=2185764
 
 # install LocalDB
-RUN Start-Process 'C:\\downloads\\SQL2019-SSEI-Expr.exe' -ArgumentList '/Action=Download', '/MediaType=LocalDB', '/Quiet' -NoNewWindow -Wait;
-RUN Start-Process 'C:\\downloads\\VC_redist.x64.exe' -ArgumentList '/install', '/passive', '/norestart' -NoNewWindow -Wait;
-RUN Start-Process msiexec.exe -ArgumentList '/i',  (Join-Path $env:USERPROFILE '\Downloads\en-US\\SqlLocalDB.msi'), '/quiet', '/norestart', 'IACCEPTSQLLOCALDBLICENSETERMS=YES', '/L C:\localdb-install-log.txt' -NoNewWindow -Wait;
+RUN Start-Process 'C:\\downloads\\SQL2019-SSEI-Expr.exe' -ArgumentList '/Action=Download', '/MediaType=LocalDB', '/Quiet' -NoNewWindow -Wait; `
+    Start-Process 'C:\\downloads\\VC_redist.x64.exe' -ArgumentList '/install', '/passive', '/norestart' -NoNewWindow -Wait; `
+    Start-Process msiexec.exe -ArgumentList '/i',  (Join-Path $env:USERPROFILE '\Downloads\en-US\SqlLocalDB.msi'), '/quiet', '/norestart', 'IACCEPTSQLLOCALDBLICENSETERMS=YES' -NoNewWindow -Wait;
 
 # install sqlcmd.exe
-RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\msodbcsql.msi', '/quiet', '/norestart', 'IACCEPTMSODBCSQLLICENSETERMS=YES', '/L C:\msodbcsql-install-log.txt' -NoNewWindow -Wait;
-RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\MsSqlCmdLnUtils.msi', '/quiet', '/norestart', 'IACCEPTMSSQLCMDLNUTILSLICENSETERMS=YES', '/L C:\sqlcmd-install-log.txt' -NoNewWindow -Wait;
+RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\msodbcsql.msi', '/quiet', '/norestart', 'IACCEPTMSODBCSQLLICENSETERMS=YES' -NoNewWindow -Wait; `
+    Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\MsSqlCmdLnUtils.msi', '/quiet', '/norestart', 'IACCEPTMSSQLCMDLNUTILSLICENSETERMS=YES' -NoNewWindow -Wait;
 
 # install sqlpackage.exe
-RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\DacFramework.msi', '/quiet', '/norestart', '/L C:\dac-install-log.txt' -NoNewWindow -Wait;
+RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\DacFramework.msi', '/quiet', '/norestart' -NoNewWindow -Wait; `
+    SETX PATH ('{0};C:\Program Files\Microsoft SQL Server\160\DAC\bin;' -f ${env:PATH}) | Out-Null;
 
-# install latest CU
-RUN C:\\downloads\\SQLServer2019-CU-x64.exe /X:C:/downloads/CU
+# install latest SQL CU
+RUN C:\\downloads\\SQLServer2019-CU-x64.exe /X:C:/downloads/CU;
 RUN C:\\downloads\\CU\\SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTerms
 
 # cleanup
 RUN Remove-Item -Path 'C:\\downloads' -Force -Recurse
 
-# create LocalDB instance and share
-RUN SqlLocalDB.exe create 'Sitecore'; `
-    SqlLocalDB.exe share 'Sitecore' 'SC_DB';
+# install Sitecore stock dacpack's
+COPY --from=scr.sitecore.com/sxp/sitecore-xm1-mssql-init:10.2.0-ltsc2019 C:\resources C:\mssql-init\resources\
 
-# TODO: cannot start, try use: https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/sqlclient-support-for-localdb
-
-COPY . C:/inetpub/wwwroot/App_Data/databases/
-RUN icacls 'C:\inetpub\wwwroot\App_Data\databases\*' /grant 'Everyone:M'
 ###
 
 ARG BUILD_CONFIGURATION='Release'
