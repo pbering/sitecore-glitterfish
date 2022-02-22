@@ -51,8 +51,7 @@ COPY *.ps1 C:/
 # cleanup
 RUN Remove-Item -Path 'C:\\downloads' -Force -Recurse
 
-###
-
+# continue with CM role...
 ARG BUILD_CONFIGURATION='Release'
 
 ENV SITECORE_LICENSE_LOCATION='C:\license\license.xml' `

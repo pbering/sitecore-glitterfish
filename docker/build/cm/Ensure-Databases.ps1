@@ -2,13 +2,24 @@ $sqlInstanceName = "MSSQLLocalDB"
 $sqlShareName = "SC"
 $sqlServer = "(LocalDB)\.\$sqlShareName"
 $sqlLogin = "IIS APPPOOL\DefaultAppPool"
+$sqlDataRoot = "$env:USERPROFILE\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances\$sqlInstanceName"
 
 # ensure localdb is ready
-sqllocaldb.exe create $sqlInstanceName
-sqllocaldb.exe share $sqlInstanceName $sqlShareName
-sqllocaldb.exe start $sqlInstanceName
+$localDbState = (sqllocaldb.exe info $sqlInstanceName | Select-String "State:")
 
-# deploy any missing databases
+if ($null -eq $localDbState)
+{
+    sqllocaldb.exe share $sqlInstanceName $sqlShareName
+}
+
+if ($null -ne $localDbState -and $localDbState -like "*stopped")
+{
+    sqllocaldb.exe start $sqlInstanceName
+}
+
+Write-Host "### LocalDB ready."
+
+# deploy or attach databases
 $existingDatabases = (sqlcmd.exe -S $sqlServer -Q "SET NOCOUNT ON; SELECT name FROM sys.databases" -h -1 -W)
 $expectedDatabases = Get-ChildItem -Path "C:\mssql-init\resources" -Filter "*.dacpac"
 $missingDatabases = $expectedDatabases | Where-Object { !$existingDatabases.Contains($_.BaseName) }
@@ -16,15 +27,30 @@ $missingDatabases = $expectedDatabases | Where-Object { !$existingDatabases.Cont
 if ($missingDatabases.Count -gt 0)
 {
     $missingDatabases | ForEach-Object {
-        sqlpackage.exe /a:Publish /sf:"$($_.FullName)" /p:AllowIncompatiblePlatform=True /tdn:"$($_.BaseName)" /tsn:$sqlServer
 
-        $LASTEXITCODE -ne 0 | Where-Object { $_ } | ForEach-Object { throw ("Error while deploying '{0}'." -f $_.FullName) }
+        $databaseName = $_.BaseName
+        $databaseDataFilePath = "$sqlDataRoot\$databaseName`_Primary.mdf"
+        $databaseLogFilePath = "$sqlDataRoot\$databaseName`_Primary.ldf"
+        $attachDatabase = (Test-Path $databaseDataFilePath) -and (Test-Path $databaseLogFilePath)
+
+        if ($attachDatabase)
+        {
+            Write-Host "### Attaching database '$databaseDataFilePath' as '$databaseName'."
+
+            sqlcmd.exe -S $sqlServer -Q "CREATE DATABASE [$databaseName] ON (FILENAME = '$databaseDataFilePath'), (FILENAME = '$databaseLogFilePath') FOR ATTACH;"
+        }
+        else
+        {
+            Write-Host "### Deploying dacpac '$($_.FullName)' as '$databaseName'."
+
+            sqlpackage.exe /a:Publish /sf:$_.FullName /p:AllowIncompatiblePlatform=True /tdn:$databaseName /tsn:$sqlServer
+        }
+
+        $LASTEXITCODE -ne 0 | Where-Object { $_ } | ForEach-Object { throw "Error while processing database '$databaseName'." }
     }
 }
-else
-{
-    Write-Host "Existing Sitecore databases present, skipping database deployment..."
-}
+
+Write-Host "### Sitecore databases ready."
 
 # deploy any missing SQL logins
 $deploySqlLogin = (sqlcmd.exe -S $sqlServer -Q "SELECT COUNT(*) FROM sys.server_principals WHERE name = '$sqlLogin';" -h -1 -W | Select-Object -First 1) -eq "0"
@@ -33,7 +59,5 @@ if ($deploySqlLogin)
 {
     sqlcmd.exe -S $sqlServer -Q "CREATE LOGIN [$sqlLogin] FROM Windows; EXEC sp_addsrvrolemember '$sqlLogin', sysadmin;"
 }
-else
-{
-    Write-Host "Existing SQL login present, skipping sql login deployment..."
-}
+
+Write-Host "### SQL credentials ready."
