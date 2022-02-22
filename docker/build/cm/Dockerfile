@@ -5,18 +5,18 @@ ARG SOLUTION_IMAGE
 ARG TOOLS_IMAGE
 ARG MANAGEMENT_SERVICES_IMAGE
 ARG HEADLESS_SERVICES_IMAGE
+ARG MSSQL_INIT_IMAGE
 
 FROM ${SOLUTION_IMAGE} AS solution
 FROM ${TOOLS_IMAGE} AS tools
 FROM ${MANAGEMENT_SERVICES_IMAGE} AS management_services
 FROM ${HEADLESS_SERVICES_IMAGE} AS headless_services
+FROM ${MSSQL_INIT_IMAGE} AS mssql_init
 FROM ${PARENT_IMAGE}
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-###
-
-## TODO: add to new stage for downloads?
+# download LocalDB, updates and SQL tools
 RUN New-Item -Path 'C:\\downloads' -ItemType 'Directory' -Force | Out-Null; `
     & curl.exe -sS -L -o 'C:\\downloads\\SQL2019-SSEI-Expr.exe' https://go.microsoft.com/fwlink/?LinkID=866658; `
     & curl.exe -sS -L -o 'C:\\downloads\\VC_redist.x64.exe' https://aka.ms/vs/17/release/vc_redist.x64.exe; `
@@ -43,7 +43,7 @@ RUN C:\\downloads\\SQLServer2019-CU-x64.exe /X:C:/downloads/CU;
 RUN C:\\downloads\\CU\\SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTerms
 
 # install Sitecore stock dacpac's
-COPY --from=scr.sitecore.com/sxp/sitecore-xm1-mssql-init:10.2.0-ltsc2019 C:\resources C:\mssql-init\resources\
+COPY --from=mssql_init C:\resources C:\mssql-init\resources\
 
 # install scripts
 COPY *.ps1 C:/
