@@ -9,3 +9,8 @@ services:
       - ${HOST_LICENSE_FOLDER}:C:\license:ro
       - .\docker\deploy\platform:C:\deploy:rw
       - .\docker\data\cm\localdb:C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances:rw
+    deploy:
+      resources:
+        limits:
+          cpus: "3"
+          memory: 3GB
