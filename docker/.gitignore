@@ -1,4 +1,4 @@
-/data/localdb/*
-!/data/localdb/.gitkeep
+/data/cm/localdb/*
+!/data/cm/localdb/.gitkeep
 /deploy/platform/*
 !/deploy/platform/.gitkeep

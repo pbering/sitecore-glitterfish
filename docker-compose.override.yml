@@ -7,7 +7,7 @@ services:
     volumes:
       - ${HOST_LICENSE_FOLDER}:C:\license:ro
       - .\docker\deploy\platform:C:\deploy:rw
-      - .\docker\data\localdb:C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances:rw
+      - .\docker\data\cm\localdb:C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances:rw
     entrypoint: powershell.exe -Command "& C:\tools\entrypoints\iis\Development.ps1"
     deploy:
       resources:

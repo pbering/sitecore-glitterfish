@@ -56,11 +56,11 @@ RUN Remove-Item -Path 'C:\\downloads' -Force -Recurse
 ARG BUILD_CONFIGURATION='Release'
 
 ENV SITECORE_LICENSE_LOCATION='C:\license\license.xml' `
-    Sitecore_ConnectionStrings_Core='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
-    Sitecore_ConnectionStrings_Security='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
-    Sitecore_ConnectionStrings_Master='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.Master;' `
-    Sitecore_ConnectionStrings_Web='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.Web;' `
-    Sitecore_ConnectionStrings_ExperienceForms='Data Source=(LocalDB)\.\SC_DB;Integrated Security=true;Initial Catalog=Sitecore.ExperienceForms;' `
+    Sitecore_ConnectionStrings_Core='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
+    Sitecore_ConnectionStrings_Security='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
+    Sitecore_ConnectionStrings_Master='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Master;' `
+    Sitecore_ConnectionStrings_Web='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Web;' `
+    Sitecore_ConnectionStrings_ExperienceForms='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.ExperienceForms;' `
     MEDIA_REQUEST_PROTECTION_SHARED_SECRET='4IDZxWd41uFe4_7drK_pnO9lzDLTgtK-L-gEx3KNLMzuwzEPEJpHX9G4HZtK' `
     Sitecore_AppSettings_Telerik.AsyncUpload.ConfigurationEncryptionKey='QCkAzV6c7q1bXGcdy8uFkJ9JC7Ns0nL00vlAo0eKZ9Mcn-zvbX-LmgdpnCJf' `
     Sitecore_AppSettings_Telerik.Upload.ConfigurationHashKey='gs4gZxwuW1POyjbHrYiL7SlZlM5kDtuNWGo2-XuGWU--cCPyD53keInlnTgarNTVXRwbh4anM5z0bNB6q8dBZBTKvK15yuLKpyjh' `
