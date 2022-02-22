@@ -19,3 +19,5 @@ services:
         HEADLESS_SERVICES_IMAGE: ${HEADLESS_SERVICES_IMAGE}
         MSSQL_INIT_IMAGE: ${MSSQL_INIT_IMAGE}
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
+    depends_on:
+      - solution

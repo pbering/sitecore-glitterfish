@@ -46,10 +46,13 @@ RUN C:\\downloads\\CU\\SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTe
 COPY --from=mssql_init C:\resources C:\mssql-init\resources\
 
 # install scripts
-COPY *.ps1 C:/
+COPY *.ps1 C:/tools/entrypoints/iis/
 
 # cleanup
 RUN Remove-Item -Path 'C:\\downloads' -Force -Recurse
+
+# set new default entrypoint
+ENTRYPOINT [ "powershell", "-Command", "& C:\\tools\\entrypoints\\iis\\Glitterfish.ps1" ]
 
 # continue with CM role...
 ARG BUILD_CONFIGURATION='Release'

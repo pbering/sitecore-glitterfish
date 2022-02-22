@@ -35,13 +35,13 @@ if ($missingDatabases.Count -gt 0)
 
         if ($attachDatabase)
         {
-            Write-Host "### Attaching database '$databaseDataFilePath' as '$databaseName'."
+            Write-Host "### Attaching database '$databaseName'."
 
             sqlcmd.exe -S $sqlServer -Q "CREATE DATABASE [$databaseName] ON (FILENAME = '$databaseDataFilePath'), (FILENAME = '$databaseLogFilePath') FOR ATTACH;"
         }
         else
         {
-            Write-Host "### Deploying dacpac '$($_.FullName)' as '$databaseName'."
+            Write-Host "### Deploying dacpac as '$databaseName'."
 
             sqlpackage.exe /a:Publish /sf:$_.FullName /p:AllowIncompatiblePlatform=True /tdn:$databaseName /tsn:$sqlServer
         }
