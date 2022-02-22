@@ -45,7 +45,7 @@ if ($missingDatabases.Count -gt 0)
         {
             Write-Host "### Deploying dacpac as '$databaseName'."
 
-            sqlpackage.exe /a:Publish /sf:$_.FullName /p:AllowIncompatiblePlatform=True /tdn:$databaseName /tsn:$sqlServer
+            sqlpackage.exe /a:Publish /sf:"$($_.FullName)" /p:AllowIncompatiblePlatform=True /tdn:$databaseName /tsn:$sqlServer
         }
 
         $LASTEXITCODE -ne 0 | Where-Object { $_ } | ForEach-Object { throw "Error while processing database '$databaseName'." }
