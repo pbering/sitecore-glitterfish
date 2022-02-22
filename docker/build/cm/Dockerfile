@@ -26,8 +26,8 @@ RUN New-Item -Path 'C:\\downloads' -ItemType 'Directory' -Force | Out-Null; `
     & curl.exe -sS -L -o 'C:\\downloads\\DacFramework.msi' https://go.microsoft.com/fwlink/?linkid=2185764
 
 # install LocalDB
-RUN Start-Process 'C:\\downloads\\SQL2019-SSEI-Expr.exe' -ArgumentList '/Action=Download', '/MediaType=LocalDB', '/Quiet' -NoNewWindow -Wait; `
-    Start-Process 'C:\\downloads\\VC_redist.x64.exe' -ArgumentList '/install', '/passive', '/norestart' -NoNewWindow -Wait; `
+RUN Start-Process 'C:\\downloads\\VC_redist.x64.exe' -ArgumentList '/install', '/passive', '/norestart' -NoNewWindow -Wait; `
+    Start-Process 'C:\\downloads\\SQL2019-SSEI-Expr.exe' -ArgumentList '/Action=Download', '/MediaType=LocalDB', '/Quiet' -NoNewWindow -Wait; `
     Start-Process msiexec.exe -ArgumentList '/i',  (Join-Path $env:USERPROFILE '\Downloads\en-US\SqlLocalDB.msi'), '/quiet', '/norestart', 'IACCEPTSQLLOCALDBLICENSETERMS=YES' -NoNewWindow -Wait;
 
 # install sqlcmd.exe
@@ -42,11 +42,14 @@ RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\downloads\\DacFramework.m
 RUN C:\\downloads\\SQLServer2019-CU-x64.exe /X:C:/downloads/CU;
 RUN C:\\downloads\\CU\\SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTerms
 
+# install Sitecore stock dacpac's
+COPY --from=scr.sitecore.com/sxp/sitecore-xm1-mssql-init:10.2.0-ltsc2019 C:\resources C:\mssql-init\resources\
+
+# install scripts
+COPY *.ps1 C:/
+
 # cleanup
 RUN Remove-Item -Path 'C:\\downloads' -Force -Recurse
-
-# install Sitecore stock dacpack's
-COPY --from=scr.sitecore.com/sxp/sitecore-xm1-mssql-init:10.2.0-ltsc2019 C:\resources C:\mssql-init\resources\
 
 ###
 
@@ -71,13 +74,6 @@ COPY --from=management_services C:\module\cm\content C:\inetpub\wwwroot
 COPY --from=headless_services C:\module\cm\content C:\inetpub\wwwroot
 COPY --from=headless_services C:\module\tools C:\module\tools
 RUN C:\module\tools\Initialize-Content.ps1 -TargetPath C:\inetpub\wwwroot; Remove-Item -Path C:\module -Recurse -Force;
-
-RUN Remove-Item -Path '.\App_Config\Sitecore\ItemWebApi' -Recurse -Force; `
-    Remove-Item -Path '.\App_Config\Sitecore\Update' -Recurse -Force; `
-    Remove-Item -Path '.\App_Config\Sitecore\DetectionServices.Location' -Recurse -Force; `
-    Remove-Item -Path '.\App_Config\Sitecore\DeviceDetection.Client' -Recurse -Force; `
-    Remove-Item -Path '.\App_Config\Sitecore\Buckets' -Recurse -Force; `
-    Remove-Item -Path '.\App_Config\Sitecore\MVC.DeviceSimulator' -Recurse -Force;
 
 COPY --from=solution /artifacts/platform/ ./
 RUN & 'C:\tools\scripts\Invoke-XdtTransform.ps1' -Path '.\Web.config' -XdtPath '.\Web.Common.config.xdt'; `
