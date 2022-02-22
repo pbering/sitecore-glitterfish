@@ -1,6 +1,7 @@
 $sqlInstanceName = "MSSQLLocalDB"
 $sqlShareName = "SC"
 $sqlServer = "(LocalDB)\.\$sqlShareName"
+$sqlLoginTimeout = 30
 $sqlLogin = "IIS APPPOOL\DefaultAppPool"
 $sqlDataRoot = "$env:USERPROFILE\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances\$sqlInstanceName"
 $resourcesPath = "C:\mssql-init\resources"
@@ -21,7 +22,7 @@ if ($null -ne $localDbState -and $localDbState -like "*stopped")
 Write-Host "### LocalDB ready."
 
 # ensure databases ready
-$existingDatabases = (sqlcmd.exe -S $sqlServer -Q "SET NOCOUNT ON; SELECT name FROM sys.databases" -h -1 -W)
+$existingDatabases = (sqlcmd.exe -S $sqlServer -Q "SET NOCOUNT ON; SELECT name FROM sys.databases" -h -1 -W -l $sqlLoginTimeout)
 $expectedDatabases = Get-ChildItem -Path $resourcesPath -Filter "*.dacpac"
 $missingDatabases = $expectedDatabases | Where-Object { !$existingDatabases.Contains($_.BaseName) }
 
@@ -38,7 +39,7 @@ if ($missingDatabases.Count -gt 0)
         {
             Write-Host "### Attaching database '$databaseName'."
 
-            sqlcmd.exe -S $sqlServer -Q "CREATE DATABASE [$databaseName] ON (FILENAME = '$databaseDataFilePath'), (FILENAME = '$databaseLogFilePath') FOR ATTACH;"
+            sqlcmd.exe -S $sqlServer -Q "CREATE DATABASE [$databaseName] ON (FILENAME = '$databaseDataFilePath'), (FILENAME = '$databaseLogFilePath') FOR ATTACH;" -l $sqlLoginTimeout
         }
         else
         {
@@ -54,11 +55,11 @@ if ($missingDatabases.Count -gt 0)
 Write-Host "### Sitecore databases ready."
 
 # ensure SQL credentials ready
-$deploySqlLogin = (sqlcmd.exe -S $sqlServer -Q "SELECT COUNT(*) FROM sys.server_principals WHERE name = '$sqlLogin';" -h -1 -W | Select-Object -First 1) -eq "0"
+$deploySqlLogin = (sqlcmd.exe -S $sqlServer -Q "SELECT COUNT(*) FROM sys.server_principals WHERE name = '$sqlLogin';" -h -1 -W -l $sqlLoginTimeout | Select-Object -First 1) -eq "0"
 
 if ($deploySqlLogin)
 {
-    sqlcmd.exe -S $sqlServer -Q "CREATE LOGIN [$sqlLogin] FROM Windows; EXEC sp_addsrvrolemember '$sqlLogin', sysadmin;"
+    sqlcmd.exe -S $sqlServer -Q "CREATE LOGIN [$sqlLogin] FROM Windows; EXEC sp_addsrvrolemember '$sqlLogin', sysadmin;" -l $sqlLoginTimeout
 }
 
 Write-Host "### SQL credentials ready."

@@ -5,7 +5,8 @@ services:
       context: .
       args:
         BUILD_CONFIGURATION: ${BUILD_CONFIGURATION}
-    scale: 0
+    deploy:
+      replicas: 0
 
   cm:
     image: ${REGISTRY}${COMPOSE_PROJECT_NAME}-cm:${VERSION:-latest}
