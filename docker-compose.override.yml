@@ -3,6 +3,7 @@ services:
     ports:
       - "44090:80"
     environment:
+      SITECORE_LICENSE_LOCATION: C:\license\license.xml
       SITECORE_ADMIN_PASSWORD: ${SITECORE_ADMIN_PASSWORD}
       SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
     volumes:
@@ -12,5 +13,4 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "3"
-          memory: 3GB
+          memory: 2GB
