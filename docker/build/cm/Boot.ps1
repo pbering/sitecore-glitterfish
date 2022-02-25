@@ -43,7 +43,7 @@ if ($missingDatabases.Count -gt 0)
         }
         else
         {
-            Write-Host "### Deploying dacpac as '$databaseName'."
+            Write-Host "### Deploying dacpac '$databaseName'."
 
             sqlpackage.exe /a:Publish /sf:"$($_.FullName)" /p:AllowIncompatiblePlatform=True /tdn:$databaseName /tsn:$sqlServer
         }

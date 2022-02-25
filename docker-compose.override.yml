@@ -3,11 +3,9 @@ services:
     ports:
       - "44090:80"
     environment:
-      SITECORE_LICENSE_LOCATION: C:\license\license.xml
       SITECORE_ADMIN_PASSWORD: ${SITECORE_ADMIN_PASSWORD}
       SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
     volumes:
-      - ${HOST_LICENSE_FOLDER}:C:\license:ro
       - .\docker\deploy\platform:C:\deploy:rw
       - .\docker\data\cm\localdb:C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances:rw
     deploy:

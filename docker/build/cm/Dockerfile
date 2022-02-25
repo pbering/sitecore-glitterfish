@@ -60,13 +60,17 @@ COPY --from=mssql_init C:\SetSitecoreAdminPassword.ps1 C:\mssql-init\
 # copy scripts
 COPY *.ps1 C:/tools/entrypoints/iis/
 
+# copy license.xml
+COPY license.xml C:/license/
+
 # set new default entrypoint
 ENTRYPOINT [ "powershell", "-Command", "& C:\\tools\\entrypoints\\iis\\Glitterfish.ps1" ]
 
 # continue with CM role...
 ARG BUILD_CONFIGURATION='Release'
 
-ENV Sitecore_ConnectionStrings_Core='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
+ENV SITECORE_LICENSE_LOCATION='C:\license\license.xml' `
+    Sitecore_ConnectionStrings_Core='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
     Sitecore_ConnectionStrings_Security='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
     Sitecore_ConnectionStrings_Master='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Master;' `
     Sitecore_ConnectionStrings_Web='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Web;' `
