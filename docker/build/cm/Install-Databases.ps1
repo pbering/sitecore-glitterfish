@@ -19,11 +19,6 @@ if ((Test-Path $InstallPath) -eq $false)
     New-Item -Path $InstallPath -ItemType "Directory" | Out-Null
 }
 
-if ((Test-Path $DataPath) -eq $false)
-{
-    New-Item -Path $DataPath -ItemType "Directory" | Out-Null
-}
-
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SMO") | Out-Null
 
 $sql = New-Object Microsoft.SqlServer.Management.Smo.Server($Server)

@@ -12,16 +12,16 @@ Running Sitecore in a single container is made possible by:
 
 1. Place your Sitecore license in `.\docker\build\cm`.
 1. [optional] `$env:REGISTRY="<REGISTRY>/"` to set your target registry so images are tagged accordingly.
-1. `docker compose build`
+1. `docker-compose build`
 1. [optional] `docker login` or whatever is needed to authenticate to your target registry.
-1. [optional] `docker compose push cm`
+1. [optional] `docker-compose push cm`
 
 ## Run/Develop on local Windows machine
 
 if you run directly in this repo:
 
-1. `$env:REGISTRY="<REGISTRY>/"` to set your private registry where the image is pushed to.
-1. `docker compose up -d`
+1. `$env:REGISTRY="<REGISTRY>/"` to set your private registry where the image are pushed to.
+1. `docker-compose up -d`
 1. `start http://localhost:44090/sitecore/login`
 
 ### Using Sitecore CLI
@@ -29,9 +29,9 @@ if you run directly in this repo:
 1. `dotnet tool restore`
 1. `dotnet sitecore login --insecure --cm http://localhost:44090 --auth http://localhost:44090 --client-credentials true --allow-write true --client-id "sitecore\admin" --client-secret "b"`
 
-### Running from another machine/repo
+### Run/Develop from another Windows machine or repo
 
-Just to test out: `docker run --rm -d -p 44090:80 -e SITECORE_ADMIN_PASSWORD=b <REGISTRY>/sitecore-glitterfish-cm`
+Just to test it out: `docker run --rm -d -p 44090:80 -e SITECORE_ADMIN_PASSWORD=b <REGISTRY>/sitecore-glitterfish-cm`
 
 Or using compose with database persistence and a deployment folder (which is watched for file changes as usual):
 
@@ -49,16 +49,8 @@ Or using compose with database persistence and a deployment folder (which is wat
          SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
       volumes:
          - .\docker\deploy\platform:C:\deploy:rw
-         - .\docker\data\cm\localdb:C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances:rw
+         - .\docker\data\cm\mssql:C:\data:rw
 ```
-
-## Run/Develop on remote Azure Container Instances from local Windows/Linux/macOS machine
-
-1. `az account set --subscription <SUBSCRIPTION ID>`
-1. `az group create --name glitterfish-rg --location westeurope`
-1. `az container create --resource-group glitterfish-rg --name glitterfish-cm --os-type Windows --location westeurope --image perberingdevtest.azurecr.io/sitecore-glitterfish-cm:latest --ports 80 --registry-login-server <REGISTRY URL> --registry-username <REGISTRY USERNAME> --registry-password <REGISTRY PASSWORD>`
-1. WARNING, TAKES a while... zzzz
-1. document, men drop... tager en evighed
 
 ## Run/Develop on remote Azure App Service from local Windows/Linux/macOS machine
 
@@ -79,7 +71,8 @@ Or using compose with database persistence and a deployment folder (which is wat
   - free ssl virker
   - test volume mod azure file share, virker faktisk!
   - MEGA slow pull, nok 15 min... TEST fra create til HTTP 200
-  - Terraform example?
+  - Terraform example: <https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service#windows_fx_version>
+  - hmm CI/CD med hooks til ACR: <https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=private&pivots=container-windows>
 - test på aksdc2 og om Dev virker med file share pvc
 - doc at ACI virker til run men IKKE Dev, det samme for de andre metoder...
 - doc at Docker Context ACI ikke virker med windows...
