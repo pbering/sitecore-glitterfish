@@ -8,7 +8,7 @@ Suitable for:
 - Quickly starting new solutions.
 - Prototyping modules/code, testing or reproducing issues.
 - Running in resource constrained environments such as VM's, older laptops etc.
-- Hosting in cloud for developers on non Windows machines.
+- Hosting in cloud/VM for developers on non Windows machines.
 
 Jump directly to [getting started](#getting-started), the [examples](#examples) or dig into the [implementation details](#implementation-details).
 
@@ -25,14 +25,14 @@ Jump directly to [getting started](#getting-started), the [examples](#examples) 
 
 | Option                                                                                             | Notes                                         | SQL data                   | Deployment folder          |
 | -------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------- | -------------------------- |
-| Windows machine                                                                                    | Fastest                                       | On host                    | On host                    |
-| Windows VM (cloud/Linux/macOS)                                                                     | Fast                                          | Inside VM                  | Inside VM                  |
+| Windows machine                                                                                    | Very fast                                     | On host                    | On host                    |
+| Windows VM cloud/Linux/macOS                                                                       | Fast                                          | VM                  | VM/Share/Azure Files      |
 | [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/)         | Fast                                          | Azure Disk                 | Azure Files                |
 | [Azure Web App for Containers](https://azure.microsoft.com/en-us/services/app-service/containers/) | Very slow startup\*, fast when warm, auto ssl | Azure Files                | Azure Files                |
 | [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/)       | Very slow startup\*, usable when warm         | ~~No Windows support yet~~ | ~~No Windows support yet~~ |
 | ~~[Azure Container Apps](https://azure.microsoft.com/en-us/services/container-apps/)~~             | ~~No Windows support yet~~                    | ~~No Windows support yet~~ | ~~No Windows support yet~~ |
 
-> \* Pulling image from registry in same region can take up to 20 minutes.
+> \* First time pulling image from registry in same region can take up to 20 minutes, restarts up to 10 minutes.
 
 ## Getting started
 
