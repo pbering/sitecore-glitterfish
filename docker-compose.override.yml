@@ -7,7 +7,7 @@ services:
       SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
     volumes:
       - .\docker\deploy\platform:C:\deploy:rw
-      - .\docker\data\cm\mssql:C:\data:rw
+      - .\docker\data\cm\mssql:C:\mssql:rw
     deploy:
       resources:
         limits:

@@ -21,4 +21,7 @@ Write-Host "### Starting..."
 Write-Host $template
 
 . (Join-Path $PSScriptRoot ".\GlitterfishBoot.ps1")
+
+Write-Host "### Finished."
+
 . (Join-Path $PSScriptRoot ".\Development.ps1")

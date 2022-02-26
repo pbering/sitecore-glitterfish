@@ -33,7 +33,7 @@ RUN New-Item -Path 'C:\\install' -ItemType 'Directory' -Force | Out-Null; `
 ## install clean databases from stock mssql-init image
 COPY --from=mssql_init C:\resources C:\mssql-init\resources\
 COPY Install-Databases.ps1 C:\
-RUN & 'C:\\Install-Databases.ps1' -SourcePath 'C:\\mssql-init\\resources' -InstallPath 'C:\\clean_databases' -DataPath 'C:\\data' -Server '.\SQLExpress'; `
+RUN & 'C:\\Install-Databases.ps1' -SourcePath 'C:\\mssql-init\\resources' -InstallPath 'C:\\clean_databases' -DataPath 'C:\\mssql' -Server '.\SQLExpress'; `
     Remove-Item -Path 'C:\\mssql-init' -Force -Recurse; `
     Remove-Item -Path 'C:\\Install-Databases.ps1' -Force;
 

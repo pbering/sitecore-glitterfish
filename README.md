@@ -49,7 +49,7 @@ Or using compose with database persistence and a deployment folder (which is wat
          SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
       volumes:
          - .\docker\deploy\platform:C:\deploy:rw
-         - .\docker\data\cm\mssql:C:\data:rw
+         - .\docker\data\cm\mssql:C:\mssql:rw
 ```
 
 ## Run/Develop on remote Azure App Service from local Windows/Linux/macOS machine
@@ -77,3 +77,4 @@ Or using compose with database persistence and a deployment folder (which is wat
 - doc at ACI virker til run men IKKE Dev, det samme for de andre metoder...
 - doc at Docker Context ACI ikke virker med windows...
 - doc at Azure Container Apps IKKE viker med windows..
+- stats... cold startup 12 sec, login warm XXX sec

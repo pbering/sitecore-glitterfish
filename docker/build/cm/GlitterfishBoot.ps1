@@ -1,6 +1,6 @@
 $cleanDatabasesPath = "C:\clean_databases"
 $sqlLogin = "IIS APPPOOL\DefaultAppPool"
-$sqlDataRoot = "C:\data"
+$sqlDataRoot = "C:\mssql"
 $sqlServer = ".\SQLEXPRESS"
 $sqlServiceName = "MSSQL$`SQLEXPRESS"
 $sqlLoginTimeout = 30
