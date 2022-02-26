@@ -35,7 +35,7 @@ Get-ChildItem -Path $SourcePath -Filter "*.dacpac" | ForEach-Object {
     $databaseName = $_.BaseName
     $dacpacPath = Join-Path $SourcePath ("\{0}" -f $_.Name)
 
-    sqlpackage.exe /a:Publish /sf:$dacpacPath /tdn:$databaseName /tsn:$Server /p:AllowIncompatiblePlatform=True
+    sqlpackage.exe /a:Publish /sf:$dacpacPath /tdn:$databaseName /tsn:$Server /p:AllowIncompatiblePlatform=True /q
 
     sqlcmd.exe -S $Server -Q "EXEC MASTER.dbo.sp_detach_db @dbname = N'$databaseName', @keepfulltextindexfile = N'false'"
 

@@ -17,9 +17,6 @@ FROM ${MSSQL_INIT_IMAGE} AS mssql_init
 FROM ${PARENT_IMAGE}
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-# copy license.xml
-COPY license.xml C:/license/
-
 # download and install
 RUN New-Item -Path 'C:\\install' -ItemType 'Directory' -Force | Out-Null; `
     & curl.exe -sS -L -o 'C:\\install\\SQL2019-SSEI-Expr.exe' https://go.microsoft.com/fwlink/?LinkID=866658; `
@@ -39,6 +36,9 @@ COPY Install-Databases.ps1 C:\
 RUN & 'C:\\Install-Databases.ps1' -SourcePath 'C:\\mssql-init\\resources' -InstallPath 'C:\\clean_databases' -DataPath 'C:\\data' -Server '.\SQLExpress'; `
     Remove-Item -Path 'C:\\mssql-init' -Force -Recurse; `
     Remove-Item -Path 'C:\\Install-Databases.ps1' -Force;
+
+# copy license.xml
+COPY license.xml C:/license/
 
 # copy scripts
 COPY Glitterfish*.ps1 C:/tools/entrypoints/iis/
