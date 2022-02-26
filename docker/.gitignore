@@ -1,4 +1,5 @@
-/data/cm/localdb/*
-!/data/cm/localdb/.gitkeep
+/data
+/data/cm/mssql/*
+!/data/cm/mssql/.gitkeep
 /deploy/platform/*
 !/deploy/platform/.gitkeep
