@@ -4,7 +4,7 @@ Lightweight Sitecore development environment, only a **single** container needed
 
 Running Sitecore in a single container is made possible by:
 
-1. Using embedded [SQL Server Express LocalDB](https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/sql-server-express-localdb?view=sql-server-ver15), a small 50 MB install.
+1. Using SQL Server 2019 Express embedded into image.
 1. Sitecore CLI is supported and enabled by the same approach used in [Sitecore Reforge](https://github.com/pbering/sitecore-reforge).
 1. Disabling Solr, Sitecore Content Search and SSL.
 
@@ -77,11 +77,9 @@ Or using compose with database persistence and a deployment folder (which is wat
   - volumes til azure file share VIRKER IKKE I WINDOWS (skal i docs)!!!
 - TODO: fortsæt test i App Service Containers
   - free ssl virker
-  - test volume mod azure file share, virker faktisk til C:\deploy men ikke (pga space) på¨ "C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances"
-    - ER DET PÅ NOGEN MÅDER MULIGT at gemme localdb i anden folder? ville være lækker med C:\localdb
+  - test volume mod azure file share, virker faktisk!
   - MEGA slow pull, nok 15 min... TEST fra create til HTTP 200
-- TODO: Test in Azure Container Apps == NOPE == ingen Windows
-- TODO: Test Docker Context with ACI == NOPE == ingen Windows
+  - Terraform example?
 - test på aksdc2 og om Dev virker med file share pvc
 - doc at ACI virker til run men IKKE Dev, det samme for de andre metoder...
 - doc at Docker Context ACI ikke virker med windows...

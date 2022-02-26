@@ -14,48 +14,39 @@ FROM ${HEADLESS_SERVICES_IMAGE} AS headless_services
 FROM ${MSSQL_INIT_IMAGE} AS mssql_init
 
 # ---
-FROM ${PARENT_IMAGE} as prepare_sql
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-
-# download LocalDB, SQL tools, SQL CU
-RUN New-Item -Path 'C:\\install' -ItemType 'Directory' -Force | Out-Null; `
-    & curl.exe -sS -L -o 'C:\\install\\SQL2019-SSEI-Expr.exe' https://go.microsoft.com/fwlink/?LinkID=866658; `
-    & curl.exe -sS -L -o 'C:\\install\\DacFramework.msi' https://go.microsoft.com/fwlink/?linkid=2185764;
-
-# ---
 FROM ${PARENT_IMAGE}
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-
-# copy install assets
-COPY --from=prepare_sql C:\install\ C:\install\
-
-# install SQL Express
-COPY SqlConfiguration.ini C:/install/
-# TODO: måske er det nok at kalde UDEN config file ala: SQL2019-SSEI-Expr.exe [/ENU] [/Help] [/IAcceptSqlServerLicenseTerms] [/Quiet] [/HideProgressBar] [/Verbose] [/ConfigurationFile=C:\Configuration.ini] [/Action=Install] [/Language=en-US] [/MediaType=Core] [/InstallPath=c:\Program Files\Microsoft SQL Server] [/MediaPath=C:\SetupMedia]
-RUN Start-Process "C:\\install\\SQL2019-SSEI-Expr.exe" -ArgumentList '/ACTION=Install', 'CONFIGURATIONFILE=C:\\install\\SqlConfiguration.ini', '/HIDEPROGRESSBAR', '/QUIET', '/IACCEPTSQLSERVERLICENSETERMS' -NoNewWindow -Wait;
-
-# install sqlpackage.exe and add to PATH
-RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\install\\DacFramework.msi', '/quiet', '/norestart' -NoNewWindow -Wait; `
-    SETX PATH ('{0};C:\Program Files\Microsoft SQL Server\160\DAC\bin;' -f ${env:PATH}) | Out-Null;
-
-## TODO: install database some i gamle dage: https://github.com/Sitecore/docker-images/blob/master/build/windows/9.3.x/sitecore-xp-sqldev/Install-Databases.ps1
-
-# cleanup
-RUN Remove-Item -Path 'C:\\install' -Force -Recurse; `
-    Remove-Item -Path 'C:\\SQL2019' -Force -Recurse
-
-# copy assets from stock mssql-init image
-COPY --from=mssql_init C:\resources C:\mssql-init\resources\
-COPY --from=mssql_init C:\SetSitecoreAdminPassword.ps1 C:\mssql-init\
-
-# copy scripts
-COPY *.ps1 C:/tools/entrypoints/iis/
 
 # copy license.xml
 COPY license.xml C:/license/
 
+# download and install
+RUN New-Item -Path 'C:\\install' -ItemType 'Directory' -Force | Out-Null; `
+    & curl.exe -sS -L -o 'C:\\install\\SQL2019-SSEI-Expr.exe' https://go.microsoft.com/fwlink/?LinkID=866658; `
+    & curl.exe -sS -L -o 'C:\\install\\DacFramework.msi' https://go.microsoft.com/fwlink/?linkid=2185764; `
+    # install SQL Express
+    Start-Process "C:\\install\\SQL2019-SSEI-Expr.exe" -ArgumentList '/ACTION=Install', '/HIDEPROGRESSBAR', '/QUIET', '/IACCEPTSQLSERVERLICENSETERMS' -NoNewWindow -Wait; `
+    # install sqlpackage.exe
+    Start-Process msiexec.exe -ArgumentList '/i', 'C:\\install\\DacFramework.msi', '/quiet', '/norestart' -NoNewWindow -Wait; `
+    SETX PATH ('{0};C:\Program Files\Microsoft SQL Server\160\DAC\bin;' -f ${env:PATH}) | Out-Null; `
+    # cleanup
+    Remove-Item -Path 'C:\\install' -Force -Recurse; `
+    Remove-Item -Path 'C:\\SQL2019' -Force -Recurse;
+
+## install clean databases from stock mssql-init image
+COPY --from=mssql_init C:\resources C:\mssql-init\resources\
+COPY Install-Databases.ps1 C:\
+RUN & 'C:\\Install-Databases.ps1' -SourcePath 'C:\\mssql-init\\resources' -InstallPath 'C:\\clean_databases' -DataPath 'C:\\data' -Server '.\SQLExpress'; `
+    Remove-Item -Path 'C:\\mssql-init' -Force -Recurse; `
+    Remove-Item -Path 'C:\\Install-Databases.ps1' -Force;
+
+# copy scripts
+COPY Glitterfish*.ps1 C:/tools/entrypoints/iis/
+COPY --from=mssql_init C:\resources\SetSitecoreAdminPassword.sql C:/tools/entrypoints/iis/
+COPY --from=mssql_init C:\SetSitecoreAdminPassword.ps1 C:/tools/entrypoints/iis/
+
 # set new default entrypoint
-ENTRYPOINT [ "powershell", "-Command", "& C:\\tools\\entrypoints\\iis\\Glitterfish.ps1" ]
+ENTRYPOINT [ "powershell", "-Command", "& C:\\tools\\entrypoints\\iis\\GlitterfishEntrypoint.ps1" ]
 
 # continue with CM role...
 ARG BUILD_CONFIGURATION='Release'
