@@ -1,6 +1,6 @@
 # Sitecore Glitterfish
 
-Lightweight Sitecore XM development environment, only a **single** container needed.
+Lightweight Sitecore XM development environment, runs in a **single** container and full Sitecore CLI support.
 
 Suitable for:
 
@@ -10,12 +10,12 @@ Suitable for:
 - Running in resource constrained environments such as VM's, older laptops etc.
 - Hosting in cloud/VM for developers on non Windows machines.
 
-Jump directly to [getting started](#getting-started), the [examples](#examples) or dig into the [implementation details](#implementation-details).
+Jump directly to [getting started](#getting-started), the [examples](examples/README.md) or dig into the [implementation details](#implementation-details).
 
 ## Goals
 
 - Provide a Sitecore XM development environment with the **smallest possible footprint** in terms of compute, code and config.
-- Easy to run, understand and extend.
+- Easy to use, understand and extend.
 
 ### Non-goals
 
@@ -23,20 +23,22 @@ Jump directly to [getting started](#getting-started), the [examples](#examples) 
 
 ## Hosting options
 
-| Option                                                                                             | Notes                                         | SQL data                   | Deployment folder          |
-| -------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------- | -------------------------- |
-| Windows machine                                                                                    | Very fast                                     | On host                    | On host                    |
-| Windows VM cloud/Linux/macOS                                                                       | Fast                                          | VM                  | VM/Share/Azure Files      |
-| [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/)         | Fast                                          | Azure Disk                 | Azure Files                |
-| [Azure Web App for Containers](https://azure.microsoft.com/en-us/services/app-service/containers/) | Very slow startup\*, fast when warm, auto ssl | Azure Files                | Azure Files                |
-| [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/)       | Very slow startup\*, usable when warm         | ~~No Windows support yet~~ | ~~No Windows support yet~~ |
-| ~~[Azure Container Apps](https://azure.microsoft.com/en-us/services/container-apps/)~~             | ~~No Windows support yet~~                    | ~~No Windows support yet~~ | ~~No Windows support yet~~ |
+The different ways you can host the content management container.
+
+| Option                                                                                             | Notes                                         | SQL data               | Deployment folder      |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------- | ---------------------- | ---------------------- |
+| Windows machine                                                                                    | Very fast                                     | On host                | On host                |
+| Windows VM Linux/macOS/Cloud                                                                       | Fast                                          | VM                     | VM/Share/Azure Files   |
+| [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/)         | Fast                                          | Azure Disk             | Azure Files            |
+| [Azure Web App for Containers](https://azure.microsoft.com/en-us/services/app-service/containers/) | Very slow startup\*, fast when warm, auto ssl | Azure Files            | Azure Files            |
+| [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/)       | Very slow startup\*, usable when warm         | ~~No Windows support~~ | ~~No Windows support~~ |
+| ~~[Azure Container Apps](https://azure.microsoft.com/en-us/services/container-apps/)~~             | ~~No Windows support~~                        | ~~No Windows support~~ | ~~No Windows support~~ |
 
 > \* First time pulling image from registry in same region can take up to 20 minutes, restarts up to 10 minutes.
 
 ## Getting started
 
-First:
+Initial steps:
 
 1. Place your Sitecore license in `.\docker\build\cm`.
 
@@ -57,16 +59,7 @@ Or build and push to your own **private** registry:
 
 1. `dotnet tool restore`
 1. `dotnet sitecore login --insecure --cm http://localhost:44090 --auth http://localhost:44090 --client-credentials true --allow-write true --client-id "sitecore\admin" --client-secret "b"` (notices that both `--auth` and `--cm` points to the **same** url)
-1. Then continue as normally...
-
-## Examples
-
-- [Basic](todo) compose setup with persistence.
-- [Classic solution](todo), compose setup, persistance, Sitecore CLI.
-- [Rendering host solution](todo), compose setup, persistance, Sitecore CLI, cross platform.
-- (Coming soon) Hosting on Azure App Service
-- (Coming soon) Hosting on Azure Kubernetes Service.
-- (Coming soon) Hosting on Azure Container Instance.
+1. Then use the Sitecore CLI commands as you normally would...
 
 ## Implementation details
 
