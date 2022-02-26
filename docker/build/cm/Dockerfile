@@ -14,44 +14,35 @@ FROM ${HEADLESS_SERVICES_IMAGE} AS headless_services
 FROM ${MSSQL_INIT_IMAGE} AS mssql_init
 
 # ---
-FROM ${PARENT_IMAGE} as prepare_localdb
+FROM ${PARENT_IMAGE} as prepare_sql
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 # download LocalDB, SQL tools, SQL CU
-RUN New-Item -Path 'C:\\temp' -ItemType 'Directory' -Force | Out-Null; `
-    New-Item -Path 'C:\\install' -ItemType 'Directory' -Force | Out-Null; `
+RUN New-Item -Path 'C:\\install' -ItemType 'Directory' -Force | Out-Null; `
     & curl.exe -sS -L -o 'C:\\install\\SQL2019-SSEI-Expr.exe' https://go.microsoft.com/fwlink/?LinkID=866658; `
-    & curl.exe -sS -L -o 'C:\\install\\VC_redist.x64.exe' https://aka.ms/vs/17/release/vc_redist.x64.exe; `
-    & curl.exe -sS -L -o 'C:\\install\\msodbcsql.msi' https://download.microsoft.com/download/E/6/B/E6BFDC7A-5BCD-4C51-9912-635646DA801E/en-US/17.5.2.1/x64/msodbcsql.msi; `
-    & curl.exe -sS -L -o 'C:\\install\\MsSqlCmdLnUtils.msi' https://go.microsoft.com/fwlink/?linkid=2142258; `
-    & curl.exe -sS -L -o 'C:\\install\\DacFramework.msi' https://go.microsoft.com/fwlink/?linkid=2185764;`
-    & curl.exe -sS -L -o 'C:\\temp\\SQLServer2019-CU-x64.exe' https://download.microsoft.com/download/6/e/7/6e72dddf-dfa4-4889-bc3d-e5d3a0fd11ce/SQLServer2019-KB5008996-x64.exe;
-
-# expand SQL CU
-RUN C:\\temp\\SQLServer2019-CU-x64.exe /X:C:/install/CU;
+    & curl.exe -sS -L -o 'C:\\install\\DacFramework.msi' https://go.microsoft.com/fwlink/?linkid=2185764;
 
 # ---
 FROM ${PARENT_IMAGE}
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 # copy install assets
-COPY --from=prepare_localdb C:\install\ C:\install\
+COPY --from=prepare_sql C:\install\ C:\install\
 
-# install
-RUN Start-Process 'C:\\install\\VC_redist.x64.exe' -ArgumentList '/install', '/passive', '/norestart' -NoNewWindow -Wait; `
-    # install LocalDB
-    Start-Process 'C:\\install\\SQL2019-SSEI-Expr.exe' -ArgumentList '/Action=Download', '/MediaType=LocalDB', '/Quiet' -NoNewWindow -Wait; `
-    Start-Process msiexec.exe -ArgumentList '/i',  (Join-Path $env:USERPROFILE '\Downloads\en-US\SqlLocalDB.msi'), '/quiet', '/norestart', 'IACCEPTSQLLOCALDBLICENSETERMS=YES' -NoNewWindow -Wait; `
-    # install sqlcmd.exe
-    Start-Process msiexec.exe -ArgumentList '/i', 'C:\\install\\msodbcsql.msi', '/quiet', '/norestart', 'IACCEPTMSODBCSQLLICENSETERMS=YES' -NoNewWindow -Wait; `
-    Start-Process msiexec.exe -ArgumentList '/i', 'C:\\install\\MsSqlCmdLnUtils.msi', '/quiet', '/norestart', 'IACCEPTMSSQLCMDLNUTILSLICENSETERMS=YES' -NoNewWindow -Wait; `
-    # install sqlpackage.exe and add to PATH
-    Start-Process msiexec.exe -ArgumentList '/i', 'C:\\install\\DacFramework.msi', '/quiet', '/norestart' -NoNewWindow -Wait; `
-    SETX PATH ('{0};C:\Program Files\Microsoft SQL Server\160\DAC\bin;' -f ${env:PATH}) | Out-Null; `
-    # install SQL CU
-    C:/install/CU/SETUP.EXE /action=patch /quiet /IAcceptSQLServerLicenseTerms; `
-    # cleanup
-    Remove-Item -Path 'C:\\install' -Force -Recurse
+# install SQL Express
+COPY SqlConfiguration.ini C:/install/
+# TODO: måske er det nok at kalde UDEN config file ala: SQL2019-SSEI-Expr.exe [/ENU] [/Help] [/IAcceptSqlServerLicenseTerms] [/Quiet] [/HideProgressBar] [/Verbose] [/ConfigurationFile=C:\Configuration.ini] [/Action=Install] [/Language=en-US] [/MediaType=Core] [/InstallPath=c:\Program Files\Microsoft SQL Server] [/MediaPath=C:\SetupMedia]
+RUN Start-Process "C:\\install\\SQL2019-SSEI-Expr.exe" -ArgumentList '/ACTION=Install', 'CONFIGURATIONFILE=C:\\install\\SqlConfiguration.ini', '/HIDEPROGRESSBAR', '/QUIET', '/IACCEPTSQLSERVERLICENSETERMS' -NoNewWindow -Wait;
+
+# install sqlpackage.exe and add to PATH
+RUN Start-Process msiexec.exe -ArgumentList '/i', 'C:\\install\\DacFramework.msi', '/quiet', '/norestart' -NoNewWindow -Wait; `
+    SETX PATH ('{0};C:\Program Files\Microsoft SQL Server\160\DAC\bin;' -f ${env:PATH}) | Out-Null;
+
+## TODO: install database some i gamle dage: https://github.com/Sitecore/docker-images/blob/master/build/windows/9.3.x/sitecore-xp-sqldev/Install-Databases.ps1
+
+# cleanup
+RUN Remove-Item -Path 'C:\\install' -Force -Recurse; `
+    Remove-Item -Path 'C:\\SQL2019' -Force -Recurse
 
 # copy assets from stock mssql-init image
 COPY --from=mssql_init C:\resources C:\mssql-init\resources\
@@ -70,11 +61,11 @@ ENTRYPOINT [ "powershell", "-Command", "& C:\\tools\\entrypoints\\iis\\Glitterfi
 ARG BUILD_CONFIGURATION='Release'
 
 ENV SITECORE_LICENSE_LOCATION='C:\license\license.xml' `
-    Sitecore_ConnectionStrings_Core='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
-    Sitecore_ConnectionStrings_Security='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
-    Sitecore_ConnectionStrings_Master='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Master;' `
-    Sitecore_ConnectionStrings_Web='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.Web;' `
-    Sitecore_ConnectionStrings_ExperienceForms='Data Source=(LocalDB)\.\SC;Integrated Security=true;Initial Catalog=Sitecore.ExperienceForms;' `
+    Sitecore_ConnectionStrings_Core='Data Source=.\SQLExpress;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
+    Sitecore_ConnectionStrings_Security='Data Source=.\SQLExpress;Integrated Security=true;Initial Catalog=Sitecore.Core;' `
+    Sitecore_ConnectionStrings_Master='Data Source=.\SQLExpress;Integrated Security=true;Initial Catalog=Sitecore.Master;' `
+    Sitecore_ConnectionStrings_Web='Data Source=.\SQLExpress;Integrated Security=true;Initial Catalog=Sitecore.Web;' `
+    Sitecore_ConnectionStrings_ExperienceForms='Data Source=.\SQLExpress;Integrated Security=true;Initial Catalog=Sitecore.ExperienceForms;' `
     MEDIA_REQUEST_PROTECTION_SHARED_SECRET='4IDZxWd41uFe4_7drK_pnO9lzDLTgtK-L-gEx3KNLMzuwzEPEJpHX9G4HZtK' `
     Sitecore_AppSettings_Telerik.AsyncUpload.ConfigurationEncryptionKey='QCkAzV6c7q1bXGcdy8uFkJ9JC7Ns0nL00vlAo0eKZ9Mcn-zvbX-LmgdpnCJf' `
     Sitecore_AppSettings_Telerik.Upload.ConfigurationHashKey='gs4gZxwuW1POyjbHrYiL7SlZlM5kDtuNWGo2-XuGWU--cCPyD53keInlnTgarNTVXRwbh4anM5z0bNB6q8dBZBTKvK15yuLKpyjh' `

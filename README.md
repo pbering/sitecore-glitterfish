@@ -58,7 +58,7 @@ Or using compose with database persistence and a deployment folder (which is wat
 1. `az group create --name glitterfish-rg --location westeurope`
 1. `az container create --resource-group glitterfish-rg --name glitterfish-cm --os-type Windows --location westeurope --image perberingdevtest.azurecr.io/sitecore-glitterfish-cm:latest --ports 80 --registry-login-server <REGISTRY URL> --registry-username <REGISTRY USERNAME> --registry-password <REGISTRY PASSWORD>`
 1. WARNING, TAKES a while... zzzz
-1. issues: license, sqlcmd timeouts
+1. document, men drop... tager en evighed
 
 ## Run/Develop on remote Azure App Service from local Windows/Linux/macOS machine
 
@@ -73,10 +73,13 @@ Or using compose with database persistence and a deployment folder (which is wat
 - merge/replace with Reforge?
 - Test in ACI
   - <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-multi-container-yaml>
-  - MEGA slow, tager 10 min at create...
+  - MEGA slow, tager 10 min at create, nok 15 til pull...
   - volumes til azure file share VIRKER IKKE I WINDOWS (skal i docs)!!!
 - TODO: fortsæt test i App Service Containers
-  - test volume mod azure file share
+  - free ssl virker
+  - test volume mod azure file share, virker faktisk til C:\deploy men ikke (pga space) på¨ "C:\Users\ContainerAdministrator\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances"
+    - ER DET PÅ NOGEN MÅDER MULIGT at gemme localdb i anden folder? ville være lækker med C:\localdb
+  - MEGA slow pull, nok 15 min... TEST fra create til HTTP 200
 - TODO: Test in Azure Container Apps == NOPE == ingen Windows
 - TODO: Test Docker Context with ACI == NOPE == ingen Windows
 - test på aksdc2 og om Dev virker med file share pvc
