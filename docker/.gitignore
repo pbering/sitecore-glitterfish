@@ -1,4 +1,3 @@
-/data
 /data/cm/mssql/*
 !/data/cm/mssql/.gitkeep
 /deploy/platform/*
