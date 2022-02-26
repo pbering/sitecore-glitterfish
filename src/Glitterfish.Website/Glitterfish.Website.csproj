@@ -62,10 +62,11 @@
     <PackageReference Include="System.Memory" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Config\Include\DisableContentSearch.config" />
-    <Content Include="App_Config\Include\PerformanceTweaks.config" />
-    <Content Include="App_Config\Include\Reforge.CliSupport.config" />
-    <Content Include="App_Config\Include\Defaults.config" />
+    <Content Include="App_Config\Include\Glitterfish\CliSupport.config" />
+    <Content Include="App_Config\Include\Glitterfish\Defaults.config" />
+    <Content Include="App_Config\Include\Glitterfish\DisableContentSearch.config" />
+    <Content Include="App_Config\Include\Glitterfish\PerformanceTweaks.config" />
+    <Content Include="App_Config\Include\Glitterfish\Sites.config" />
     <None Include="Glitterfish.Website.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
     <None Include="Web.config" />
@@ -80,16 +81,14 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Support\MediaUrlBuilderWithPortSupport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Reforge.CliSupport\Reforge.CliSupport.csproj">
-      <Project>{638af28a-8aaf-4459-a51e-faa526041c05}</Project>
-      <Name>Reforge.CliSupport</Name>
+    <ProjectReference Include="..\Glitterfish\Glitterfish.csproj">
+      <Project>{ba094903-3157-404e-93f0-4b11c0b92672}</Project>
+      <Name>Glitterfish</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

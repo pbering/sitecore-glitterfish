@@ -1,80 +1,81 @@
 # Sitecore Glitterfish
 
-Lightweight Sitecore development environment, only a **single** container needed.
+Lightweight Sitecore XM development environment, only a **single** container needed.
 
-Running Sitecore in a single container is made possible by:
+Suitable for:
 
-1. Using SQL Server 2019 Express embedded into image.
-1. Sitecore CLI is supported and enabled by the same approach used in [Sitecore Reforge](https://github.com/pbering/sitecore-reforge).
-1. Disabling Solr, Sitecore Content Search and SSL.
+- Headless projects that needs a simple and light CM.
+- Quickly starting new solutions.
+- Prototyping modules/code, testing or reproducing issues.
+- Running in resource constrained environments such as VM's, older laptops etc.
+- Hosting in cloud for developers on non Windows machines.
 
-## Build (and share image on a private registry)
+Jump directly to [getting started](#getting-started), the [examples](#examples) or dig into the [implementation details](#implementation-details).
+
+## Goals
+
+- Provide a Sitecore XM development environment with the **smallest possible footprint** in terms of compute, code and config.
+- Easy to run, understand and extend.
+
+### Non-goals
+
+- Production grade images.
+
+## Hosting options
+
+| Option                                                                                             | Notes                                         | SQL data                   | Deployment folder          |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------- | -------------------------- |
+| Windows machine                                                                                    | Fastest                                       | On host                    | On host                    |
+| Windows VM (cloud/Linux/macOS)                                                                     | Fast                                          | Inside VM                  | Inside VM                  |
+| [Azure Kubernetes Service](https://azure.microsoft.com/en-us/services/kubernetes-service/)         | Fast                                          | Azure Disk                 | Azure Files                |
+| [Azure Web App for Containers](https://azure.microsoft.com/en-us/services/app-service/containers/) | Very slow startup\*, fast when warm, auto ssl | Azure Files                | Azure Files                |
+| [Azure Container Instances](https://azure.microsoft.com/en-us/services/container-instances/)       | Very slow startup\*, usable when warm         | ~~No Windows support yet~~ | ~~No Windows support yet~~ |
+| ~~[Azure Container Apps](https://azure.microsoft.com/en-us/services/container-apps/)~~             | ~~No Windows support yet~~                    | ~~No Windows support yet~~ | ~~No Windows support yet~~ |
+
+> \* Pulling image from registry in same region can take up to 20 minutes.
+
+## Getting started
+
+First:
 
 1. Place your Sitecore license in `.\docker\build\cm`.
-1. [optional] `$env:REGISTRY="<REGISTRY>/"` to set your target registry so images are tagged accordingly.
+
+Then build and run from this repo:
+
 1. `docker-compose build`
-1. [optional] `docker login` or whatever is needed to authenticate to your target registry.
-1. [optional] `docker-compose push cm`
-
-## Run/Develop on local Windows machine
-
-if you run directly in this repo:
-
-1. `$env:REGISTRY="<REGISTRY>/"` to set your private registry where the image are pushed to.
-1. `docker-compose up -d`
+1. `docker-compose up -d` or as simple as `docker run --rm -d -p 44090:80 -e SITECORE_ADMIN_PASSWORD=b sitecore-glitterfish-cm`
 1. `start http://localhost:44090/sitecore/login`
 
-### Using Sitecore CLI
+Or build and push to your own **private** registry:
+
+1. `$env:REGISTRY="<REGISTRY>/"` to set your target registry so images are tagged accordingly.
+1. `docker login` or whatever is needed to authenticate to your target registry.
+1. `docker-compose build`
+1. `docker-compose push cm`
+
+### Using the Sitecore CLI
 
 1. `dotnet tool restore`
-1. `dotnet sitecore login --insecure --cm http://localhost:44090 --auth http://localhost:44090 --client-credentials true --allow-write true --client-id "sitecore\admin" --client-secret "b"`
+1. `dotnet sitecore login --insecure --cm http://localhost:44090 --auth http://localhost:44090 --client-credentials true --allow-write true --client-id "sitecore\admin" --client-secret "b"` (notices that both `--auth` and `--cm` points to the **same** url)
+1. Then continue as normally...
 
-### Run/Develop from another Windows machine or repo
+## Examples
 
-Just to test it out: `docker run --rm -d -p 44090:80 -e SITECORE_ADMIN_PASSWORD=b <REGISTRY>/sitecore-glitterfish-cm`
+- [Basic](todo) compose setup with persistence.
+- [Classic solution](todo), compose setup, persistance, Sitecore CLI.
+- [Rendering host solution](todo), compose setup, persistance, Sitecore CLI, cross platform.
+- (Coming soon) Hosting on Azure App Service
+- (Coming soon) Hosting on Azure Kubernetes Service.
+- (Coming soon) Hosting on Azure Container Instance.
 
-Or using compose with database persistence and a deployment folder (which is watched for file changes as usual):
+## Implementation details
 
-1. `$env:REGISTRY="<REGISTRY>/"` to set your private registry where the image is pushed to.
-1. then the following compose file:
-
-```yml
-   services:
-   cm:
-      image: ${REGISTRY}/sitecore-glitterfish-cm:latest
-      ports:
-         - "44090:80"
-      environment:
-         SITECORE_ADMIN_PASSWORD: b
-         SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
-      volumes:
-         - .\docker\deploy\platform:C:\deploy:rw
-         - .\docker\data\cm\mssql:C:\mssql:rw
-```
-
-## Run/Develop on remote Azure App Service from local Windows/Linux/macOS machine
-
-...
-
-## Run/Develop on remote Azure Kubernetes Service from local Windows/Linux/macOS machine
-
-...
-
-## TODO
-
-- merge/replace with Reforge?
-- Test in ACI
-  - <https://docs.microsoft.com/en-us/azure/container-instances/container-instances-multi-container-yaml>
-  - MEGA slow, tager 10 min at create, nok 15 til pull...
-  - volumes til azure file share VIRKER IKKE I WINDOWS (skal i docs)!!!
-- TODO: fortsæt test i App Service Containers
-  - free ssl virker
-  - test volume mod azure file share, virker faktisk!
-  - MEGA slow pull, nok 15 min... TEST fra create til HTTP 200
-  - Terraform example: <https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service#windows_fx_version>
-  - hmm CI/CD med hooks til ACR: <https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=private&pivots=container-windows>
-- test på aksdc2 og om Dev virker med file share pvc
-- doc at ACI virker til run men IKKE Dev, det samme for de andre metoder...
-- doc at Docker Context ACI ikke virker med windows...
-- doc at Azure Container Apps IKKE viker med windows..
-- stats... cold startup 12 sec, login warm XXX sec
+- Minimal XM with management and headless services installed.
+- Default headless app configuration and items, named `DefaultApp`.
+- Only _one_ container running, the CM, which has an embedded SQL Server 2019 Express (not usually considered good practice to run multiple processes in the same container, but for _this_ purpose it works quite well).
+- Supports the Sitecore CLI _without_ Identity Server, the CM handles the authentication instead.
+- Sitecore license file is embedded into image to avoid dealing with volume mounts or Base64/GZipped environment variables.
+- Solr/Content Search is disabled.
+- No SSL or reverse proxies, just simple port publishing.
+- Default environment variables embedded in images, makes consumer compose files simpler while still being overridable at runtime.
+- Some less useful features disabled by default such as "WebDAV", "Item Web API", "Device Detection", "Buckets", "Geo IP", "Item Cloning" etc.

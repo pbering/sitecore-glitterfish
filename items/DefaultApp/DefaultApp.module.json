@@ -1,11 +1,11 @@
 {
-    "namespace": "Default",
+    "namespace": "DefaultApp",
     "references": [],
     "items": {
         "includes": [
             {
                 "name": "content",
-                "path": "/sitecore/content/Home",
+                "path": "/sitecore/content/DefaultApp",
                 "scope": "SingleItem"
             }
         ]

@@ -3,7 +3,7 @@ using Sitecore.Pipelines.HttpRequest;
 using Sitecore.Security.Authentication;
 using System.Text;
 
-namespace Reforge.CliSupport
+namespace Glitterfish.CliSupport
 {
     public class HandleCliAuthentication : HttpRequestProcessor
     {

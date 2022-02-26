@@ -17,11 +17,10 @@ $template = @"
 
 "@
 
-Write-Host "### Starting..."
 Write-Host $template
 
 . (Join-Path $PSScriptRoot ".\GlitterfishBoot.ps1")
 
-Write-Host "### Finished."
+Write-Host "### Finished, starting Sitecore development entrypoint."
 
 . (Join-Path $PSScriptRoot ".\Development.ps1")

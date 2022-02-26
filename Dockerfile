@@ -30,9 +30,28 @@ RUN msbuild -p:Configuration=$($env:BUILD_CONFIGURATION) `
     -p:TransformWebConfigEnabled=False `
     -p:AutoParameterizationWebConfigConnectionStrings=False `
     -r:False -m -v:m -noLogo .\src\Glitterfish.Website\Glitterfish.Website.csproj
+
+# ---
+FROM ${BUILD_IMAGE} AS build-items
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+WORKDIR /build
+COPY global.json ./
+COPY sitecore.json ./
+COPY nuget.config ./
+COPY .config/ ./.config/
+COPY items/ ./items/
+
+RUN dotnet tool restore; `
+    dotnet sitecore ser validate --verbose;`
+    dotnet sitecore itemres create --output '.\itemres\gitterfish'; `
+    Copy-Item -Path '.\itemres\items.master.gitterfish.dat' -Destination '.\itemres\items.web.gitterfish.dat'
+
 # ---
 FROM mcr.microsoft.com/windows/nanoserver:1809
 
 WORKDIR /artifacts
 
 COPY --from=build-solution /build/docker/deploy/platform ./platform/
+COPY --from=build-items ["/build/itemres/items.master.gitterfish.dat", "./platform/sitecore modules/items/master/"]
+COPY --from=build-items ["/build/itemres/items.web.gitterfish.dat", "./platform/sitecore modules/items/web/"]

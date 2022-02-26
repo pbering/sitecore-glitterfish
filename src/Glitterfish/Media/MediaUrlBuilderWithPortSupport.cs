@@ -1,7 +1,7 @@
 ﻿using Sitecore.Data.Items;
 using Sitecore.Links.UrlBuilders;
 
-namespace Glitterfish.Website.Support
+namespace Glitterfish.Media
 {
     public class MediaUrlBuilderWithPortSupport : MediaUrlBuilder
     {

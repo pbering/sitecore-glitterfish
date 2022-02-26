@@ -17,7 +17,7 @@ $noSitecoreDatabases = $null -eq (Get-ChildItem -Path $sqlDataRoot -Filter "Site
 
 if ($noSitecoreDatabases)
 {
-    Write-Host "### Sitecore databases not found in '$sqlDataRoot', seeding clean databases from '$cleanDatabasesPath'..."
+    Write-Host "### No Sitecore databases found in '$sqlDataRoot', seeding clean databases from '$cleanDatabasesPath'."
 
     Get-ChildItem -Path $cleanDatabasesPath | Copy-Item -Destination $sqlDataRoot
 }
