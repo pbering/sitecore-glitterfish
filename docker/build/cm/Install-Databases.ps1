@@ -22,9 +22,8 @@ if ((Test-Path $InstallPath) -eq $false)
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SMO") | Out-Null
 
 $sql = New-Object Microsoft.SqlServer.Management.Smo.Server($Server)
-$sql.Properties["DefaultFile"].Value = $SourcePath
-$sql.Properties["DefaultLog"].Value = $SourcePath
-$sql.Alter()
+
+$sqlDefaultDataPath = $sql.Properties["DefaultFile"].Value
 
 Get-ChildItem -Path $SourcePath -Filter "*.dacpac" | ForEach-Object {
     $databaseName = $_.BaseName
@@ -34,10 +33,9 @@ Get-ChildItem -Path $SourcePath -Filter "*.dacpac" | ForEach-Object {
 
     sqlcmd.exe -S $Server -Q "EXEC MASTER.dbo.sp_detach_db @dbname = N'$databaseName', @keepfulltextindexfile = N'false'"
 
-    Copy-Item -Path (Join-Path $SourcePath "$databaseName`_Primary.*") -Destination $InstallPath
+    Copy-Item -Path (Join-Path $sqlDefaultDataPath "$databaseName`_Primary.*") -Destination $InstallPath
 }
 
-$sql = New-Object Microsoft.SqlServer.Management.Smo.Server($Server)
 $sql.Properties["DefaultFile"].Value = $DataPath
 $sql.Properties["DefaultLog"].Value = $DataPath
 $sql.Alter()
