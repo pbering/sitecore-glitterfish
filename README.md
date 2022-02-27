@@ -1,12 +1,11 @@
 # Sitecore Glitterfish
 
-Lightweight Sitecore XM development environment, runs in a **single** container and full Sitecore CLI support.
+Lightweight Sitecore XM development environment, runs in a **single** container and have full Sitecore CLI support.
 
 Suitable for:
 
 - Headless projects that needs a simple and light CM.
-- Quickly starting new solutions.
-- Prototyping modules/code, testing or reproducing issues.
+- Quickly starting new solutions, prototyping modules/code, testing or reproducing issues.
 - Running in resource constrained environments such as VM's, older laptops etc.
 - Hosting in cloud/VM for developers on non Windows machines.
 
@@ -23,7 +22,7 @@ Jump directly to [getting started](#getting-started), the [examples](examples/RE
 
 ## Hosting options
 
-The different ways you can host the content management container.
+The different ways you can host the content management container, see the [examples](examples/README.md) how.
 
 | Option                                                                                             | Notes                                         | SQL data               | Deployment folder      |
 | -------------------------------------------------------------------------------------------------- | --------------------------------------------- | ---------------------- | ---------------------- |
@@ -70,5 +69,5 @@ Or build and push to your own **private** registry:
 - Sitecore license file is embedded into image to avoid dealing with volume mounts or Base64/GZipped environment variables.
 - Solr/Content Search is disabled.
 - No SSL or reverse proxies, just simple port publishing.
-- Default environment variables embedded in images, makes consumer compose files simpler while still being overridable at runtime.
+- Default environment variables embedded into image, makes usage much simpler while still being overridable at runtime.
 - Some less useful features disabled by default such as "WebDAV", "Item Web API", "Device Detection", "Buckets", "Geo IP", "Item Cloning" etc.
