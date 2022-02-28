@@ -49,7 +49,7 @@ Then build and run from this repo:
 
 Or build and push to your own **private** registry:
 
-1. `$env:REGISTRY="<REGISTRY>/"` to set your target registry so images are tagged accordingly.
+1. `$env:REGISTRY="<REGISTRY>/"` to set your target registry so image are tagged accordingly.
 1. `docker login` or whatever is needed to authenticate to your target registry.
 1. `docker-compose build`
 1. `docker-compose push cm`

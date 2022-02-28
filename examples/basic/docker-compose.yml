@@ -1,0 +1,9 @@
+services:
+  cm:
+    image: ${REGISTRY}sitecore-glitterfish-cm:latest
+    ports:
+      - "47080:80"
+    volumes:
+      - .\docker\data\cm\mssql:C:\mssql:rw
+    environment:
+      SITECORE_ADMIN_PASSWORD: b
