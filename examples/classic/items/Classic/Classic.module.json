@@ -1,0 +1,12 @@
+{
+    "namespace": "Classic",
+    "references": [],
+    "items": {
+        "includes": [
+            {
+                "name": "content",
+                "path": "/sitecore/content/Home"
+            }
+        ]
+    }
+}

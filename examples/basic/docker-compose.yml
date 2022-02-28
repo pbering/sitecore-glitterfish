@@ -1,6 +1,6 @@
 services:
   cm:
-    image: ${REGISTRY}sitecore-glitterfish-cm:latest
+    image: ${CM_IMAGE}
     ports:
       - "47080:80"
     volumes:

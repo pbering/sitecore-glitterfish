@@ -11,8 +11,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Glitterfish.Website</RootNamespace>
-    <AssemblyName>Glitterfish.Website</AssemblyName>
+    <RootNamespace>ClassicWebsite</RootNamespace>
+    <AssemblyName>ClassicWebsite</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -62,11 +62,8 @@
     <PackageReference Include="System.Memory" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Config\Include\Glitterfish\CliSupport.config" />
-    <Content Include="App_Config\Include\Glitterfish\Defaults.config" />
-    <Content Include="App_Config\Include\Glitterfish\DisableContentSearch.config" />
-    <Content Include="App_Config\Include\Glitterfish\PerformanceTweaks.config" />
-    <None Include="Glitterfish.Website.wpp.targets" />
+    <Content Include="ClassicWebsite.wpp.targets" />
+    <Content Include="App_Config\Include\Defaults.config" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
     <None Include="Web.config" />
     <Content Include="Web.Common.config.xdt">
@@ -81,12 +78,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Glitterfish\Glitterfish.csproj">
-      <Project>{ba094903-3157-404e-93f0-4b11c0b92672}</Project>
-      <Name>Glitterfish</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

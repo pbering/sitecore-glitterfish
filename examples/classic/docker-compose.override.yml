@@ -1,0 +1,14 @@
+services:
+  cm:
+    ports:
+      - "48080:80"
+    environment:
+      SITECORE_ADMIN_PASSWORD: ${SITECORE_ADMIN_PASSWORD}
+      SITECORE_DEVELOPMENT_PATCHES: DevEnvOn,CustomErrorsOff,DebugOn,RobotDetectionOff
+    volumes:
+      - .\docker\deploy\platform:C:\deploy:rw
+      - .\docker\data\cm\mssql:C:\mssql:rw
+    deploy:
+      resources:
+        limits:
+          memory: 2GB

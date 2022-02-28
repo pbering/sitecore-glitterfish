@@ -1,6 +1,6 @@
-# Basic example
+# Classic example
 
-Basic compose setup for running a CM and database persistence.
+Classic solution with a web application project, compose setup, database persistence, Sitecore CLI serialization.
 
 ## Run
 
