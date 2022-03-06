@@ -13,6 +13,11 @@ Write-Host "### Waiting on SQL service '$sqlServiceName'."
 Write-Host "### SQL service '$sqlServiceName' ready."
 
 # ensure databases ready
+if ((Test-Path $sqlDataRoot) -eq $false)
+{
+    New-Item -Path $sqlDataRoot -ItemType Directory | Out-Null
+}
+
 $noSitecoreDatabases = $null -eq (Get-ChildItem -Path $sqlDataRoot -Filter "Sitecore*.mdf")
 
 if ($noSitecoreDatabases)
